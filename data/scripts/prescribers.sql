@@ -30,7 +30,7 @@ LIMIT 1;
 
 
 -- 2. 
---     a. Which specialty had the most total number of claims (totaled over all drugs)?
+--     a. Which specialty had the most total number of claims (totaled over all drugs)? 
 SELECT specialty_description, COUNT(total_claim_count) AS total_claims
 FROM prescriber
 INNER JOIN
@@ -47,7 +47,7 @@ ORDER BY total_claims DESC
 --     d. **Difficult Bonus:** *Do not attempt until you have solved all other problems!* For each specialty, report the percentage of total claims by that specialty which are for opioids. Which specialties have a high percentage of opioids?
 
 -- 3. 
---     a. Which drug (generic_name) had the highest total drug cost? 
+--     a. Which drug (generic_name) had the highest total drug cost? SUM the cost
 SELECT d.generic_name, p.total_drug_cost
 FROM prescription AS p
 INNER JOIN drug AS d
@@ -80,7 +80,7 @@ ELSE 'neither' END AS drug_type
 
 --     b. Building off of the query you wrote for part a, determine whether more was spent (total_drug_cost) on opioids or on antibiotics. Hint: Format the total costs as MONEY for easier comparision.
 
--- 5. 
+-- 5. Fips county column
 --     a. How many CBSAs are in Tennessee? **Warning:** The cbsa table contains information for all states, not just Tennessee.
 SELECT COUNT(*)
 FROM cbsa
