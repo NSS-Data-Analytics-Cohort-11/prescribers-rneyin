@@ -352,21 +352,44 @@ FROM prescriber
 
 
 --     b. DONE Next, report the number of claims per drug per prescriber. Be sure to include all combinations, whether or not the prescriber had any claims. You should report the npi, the drug name, and the number of claims (total_claim_count).
---figure out how to get null values
+--figure out how to get null values  (TRY USING A CROSS JOIN)
 
 
-SELECT pr.npi, d.drug_name, p.total_claim_count
+SELECT pr.npi, d.drug_name,coalesce(SUM(p.total_claim_count),0) AS claims
 FROM prescriber AS pr
 LEFT JOIN prescription AS p
 USING(npi)
 LEFT JOIN drug AS d
 ON p.drug_name = d.drug_name
+
+-- left join (
+-- SELECT drug_name, SUM(p.total_claim_count) AS claims
+-- FROM
+-- prescription AS p
+-- GROUP BY drug_name) as sub
+-- ON d.drug_name = sub.drug_name
+
 WHERE pr.specialty_description = 'Pain Management'
 AND pr.nppes_provider_city = 'NASHVILLE'
 AND d.opioid_drug_flag = 'Y'
-OR p.total_claim_count IS NULL
-ORDER BY total_claim_count
+--OR p.total_claim_count IS NULL
 
+GROUP BY pr.npi, d.drug_name
+ORDER BY claims
+
+
+-- 1ST SOLUTION
+--SELECT pr.npi, d.drug_name, p.total_claim_count
+-- FROM prescriber AS pr
+-- LEFT JOIN prescription AS p
+-- USING(npi)
+-- LEFT JOIN drug AS d
+-- ON p.drug_name = d.drug_name
+-- WHERE pr.specialty_description = 'Pain Management'
+-- AND pr.nppes_provider_city = 'NASHVILLE'
+-- AND d.opioid_drug_flag = 'Y'
+-- OR p.total_claim_count IS NULL
+-- ORDER BY total_claim_count
 
 
 
