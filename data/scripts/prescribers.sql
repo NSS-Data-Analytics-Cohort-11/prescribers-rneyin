@@ -9,11 +9,18 @@ FROM prescription
 -- 1.
 --     a. Which prescriber had the highest total number of claims (totaled over all drugs)? Report the npi and the total number of claims.
 
-SELECT npi, COUNT(total_claim_count) AS total_claims
+-- SELECT npi, COUNT(total_claim_count) AS total_claims
+-- FROM prescription
+-- GROUP BY npi
+-- ORDER BY total_claims DESC
+-- LIMIT 1;
+
+SELECT npi, SUM(total_claim_count) AS total_claims
 FROM prescription
 GROUP BY npi
 ORDER BY total_claims DESC
 LIMIT 1;
+--aNSWER:1881634483	99707
 
 -- Answer: npi-1356305197 highest total number of claims - 379
 
@@ -366,25 +373,33 @@ FROM prescriber
 --     b. DONE Next, report the number of claims per drug per prescriber. Be sure to include all combinations, whether or not the prescriber had any claims. You should report the npi, the drug name, and the number of claims (total_claim_count).
 --figure out how to get null values  (TRY USING A CROSS JOIN)
 
-SELECT pr.npi, d.drug_name
+SELECT pr.npi, d.drug_name, SUM(p.total_claim_count)AS claims
 FROM prescriber AS pr
---CROSS JOIN prescription AS p
 CROSS JOIN drug AS d
---ON p.drug_name = d.drug_name
+LEFT JOIN prescription AS p
+ON pr.npi = p.npi
 WHERE pr.specialty_description = 'Pain Management'
 AND pr.nppes_provider_city = 'NASHVILLE'
 AND d.opioid_drug_flag = 'Y'
+GROUP BY pr.npi, d.drug_name
+ORDER BY claims
 
 
 
+-----BELOW IS WRONG
+-- SELECT pr.npi, d.drug_name,coalesce(SUM(p.total_claim_count),0) AS claims
+-- FROM prescriber AS pr
+-- CROSS JOIN prescription AS p
+-- USING(npi)
+-- LEFT JOIN drug AS d
+-- ON p.drug_name = d.drug_name
 
------BELOW WRONG
-SELECT pr.npi, d.drug_name,coalesce(SUM(p.total_claim_count),0) AS claims
-FROM prescriber AS pr
-CROSS JOIN prescription AS p
-USING(npi)
-LEFT JOIN drug AS d
-ON p.drug_name = d.drug_name
+-- WHERE pr.specialty_description = 'Pain Management'
+-- AND pr.nppes_provider_city = 'NASHVILLE'
+-- AND d.opioid_drug_flag = 'Y'
+
+-- GROUP BY pr.npi, d.drug_name
+-- ORDER BY claims
 
 -- left join (
 -- SELECT drug_name, SUM(p.total_claim_count) AS claims
@@ -393,13 +408,10 @@ ON p.drug_name = d.drug_name
 -- GROUP BY drug_name) as sub
 -- ON d.drug_name = sub.drug_name
 
-WHERE pr.specialty_description = 'Pain Management'
-AND pr.nppes_provider_city = 'NASHVILLE'
-AND d.opioid_drug_flag = 'Y'
+
 --OR p.total_claim_count IS NULL
 
-GROUP BY pr.npi, d.drug_name
-ORDER BY claims
+
 
 
 -- 1ST SOLUTION
@@ -441,15 +453,31 @@ ORDER BY claims
 
 
 --     c. DONE Finally, if you have not done so already, fill in any missing values for total_claim_count with 0. Hint - Google the COALESCE function.
-
-SELECT pr.npi, d.drug_name, COALESCE(p.total_claim_count,0) AS total_claim_count
+SELECT pr.npi, d.drug_name, COALESCE(SUM(p.total_claim_count),0)AS claims
 FROM prescriber AS pr
+CROSS JOIN drug AS d
 LEFT JOIN prescription AS p
-USING(npi)
-LEFT JOIN drug AS d
-ON p.drug_name = d.drug_name
+ON pr.npi = p.npi
 WHERE pr.specialty_description = 'Pain Management'
 AND pr.nppes_provider_city = 'NASHVILLE'
 AND d.opioid_drug_flag = 'Y'
-OR p.total_claim_count IS NULL
-ORDER BY total_claim_count
+--OR p.total_claim_count IS NULL
+GROUP BY pr.npi, d.drug_name
+ORDER BY claims
+
+
+
+
+
+
+-- SELECT pr.npi, d.drug_name, COALESCE(p.total_claim_count,0) AS total_claim_count
+-- FROM prescriber AS pr
+-- LEFT JOIN prescription AS p
+-- USING(npi)
+-- LEFT JOIN drug AS d
+-- ON p.drug_name = d.drug_name
+-- WHERE pr.specialty_description = 'Pain Management'
+-- AND pr.nppes_provider_city = 'NASHVILLE'
+-- AND d.opioid_drug_flag = 'Y'
+-- OR p.total_claim_count IS NULL
+-- ORDER BY total_claim_count
