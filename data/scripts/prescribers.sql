@@ -331,18 +331,30 @@ ORDER BY sum_of_claims DESC
 --     a. DONE First, create a list of all npi/drug_name combinations for pain management specialists (specialty_description = 'Pain Management) in the city of Nashville (nppes_provider_city = 'NASHVILLE'), where the drug is an opioid (opiod_drug_flag = 'Y'). **Warning:** Double-check your query before running it. You will only need to use the prescriber and drug tables since you don't need the claims numbers yet.
 SELECT pr.npi, d.drug_name
 FROM prescriber AS pr
-INNER JOIN prescription AS p
-USING(npi)
-INNER JOIN drug AS d
-ON p.drug_name = d.drug_name
+--CROSS JOIN prescription AS p
+CROSS JOIN drug AS d
+--ON p.drug_name = d.drug_name
 WHERE pr.specialty_description = 'Pain Management'
 AND pr.nppes_provider_city = 'NASHVILLE'
 AND d.opioid_drug_flag = 'Y'
 
 
 
-SELECT *
+SELECT * FROM DRUG
 FROM prescriber
+--GIVES 35
+-- SELECT pr.npi, d.drug_name
+-- FROM prescriber AS pr
+-- INNER JOIN prescription AS p
+-- USING(npi)
+-- INNER JOIN drug AS d
+-- ON p.drug_name = d.drug_name
+-- WHERE pr.specialty_description = 'Pain Management'
+-- AND pr.nppes_provider_city = 'NASHVILLE'
+-- AND d.opioid_drug_flag = 'Y'
+
+
+
 -- SELECT pr.npi
 -- FROM prescriber AS pr
 -- LEFT JOIN prescription AS p
@@ -354,10 +366,22 @@ FROM prescriber
 --     b. DONE Next, report the number of claims per drug per prescriber. Be sure to include all combinations, whether or not the prescriber had any claims. You should report the npi, the drug name, and the number of claims (total_claim_count).
 --figure out how to get null values  (TRY USING A CROSS JOIN)
 
+SELECT pr.npi, d.drug_name
+FROM prescriber AS pr
+--CROSS JOIN prescription AS p
+CROSS JOIN drug AS d
+--ON p.drug_name = d.drug_name
+WHERE pr.specialty_description = 'Pain Management'
+AND pr.nppes_provider_city = 'NASHVILLE'
+AND d.opioid_drug_flag = 'Y'
 
+
+
+
+-----BELOW WRONG
 SELECT pr.npi, d.drug_name,coalesce(SUM(p.total_claim_count),0) AS claims
 FROM prescriber AS pr
-LEFT JOIN prescription AS p
+CROSS JOIN prescription AS p
 USING(npi)
 LEFT JOIN drug AS d
 ON p.drug_name = d.drug_name
@@ -391,6 +415,28 @@ ORDER BY claims
 -- OR p.total_claim_count IS NULL
 -- ORDER BY total_claim_count
 
+--sol 2 beginning
+-- SELECT pr.npi, d.drug_name,coalesce(SUM(p.total_claim_count),0) AS claims
+-- FROM prescriber AS pr
+-- LEFT JOIN prescription AS p
+-- USING(npi)
+-- LEFT JOIN drug AS d
+-- ON p.drug_name = d.drug_name
+
+-- -- left join (
+-- -- SELECT drug_name, SUM(p.total_claim_count) AS claims
+-- -- FROM
+-- -- prescription AS p
+-- -- GROUP BY drug_name) as sub
+-- -- ON d.drug_name = sub.drug_name
+
+-- WHERE pr.specialty_description = 'Pain Management'
+-- AND pr.nppes_provider_city = 'NASHVILLE'
+-- AND d.opioid_drug_flag = 'Y'
+-- --OR p.total_claim_count IS NULL
+
+-- GROUP BY pr.npi, d.drug_name
+-- ORDER BY claims
 
 
 
