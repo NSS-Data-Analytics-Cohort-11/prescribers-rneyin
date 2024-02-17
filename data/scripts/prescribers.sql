@@ -31,15 +31,15 @@ SELECT pr.nppes_provider_first_name, pr.nppes_provider_last_org_name, pr.nppes_p
 FROM prescriber AS pr
 INNER JOIN
 
-(SELECT npi,COUNT(total_claim_count) AS total_claims
+(SELECT npi,SUM(total_claim_count) AS total_claims
 FROM prescription
 GROUP BY npi) As sub
 USING(npi)
 
 ORDER BY total_claims DESC
 LIMIT 1;
-
---Answer: "MICHAEL" "COX" "COX" "Internal Medicine" 379
+--aNSWER FIN: "BRUCE"	"PENDLEY"	"PENDLEY"	"Family Practice"	99707
+--Answer OLD: "MICHAEL" "COX" "COX" "Internal Medicine" 379
 
 
 -- 2.
