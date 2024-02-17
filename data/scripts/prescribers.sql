@@ -156,23 +156,52 @@ ORDER BY pr.specialty_description DESC
 -- --order by specialty_description;
 -- order by opioid_percentage desc
 
+AlTERNATE SOLUTION
+WITH claims AS 
+	(SELECT
+		pr.specialty_description,
+		SUM(rx.total_claim_count) AS total_claims
+	FROM prescriber AS pr
+	INNER JOIN prescription AS rx
+	USING(npi)
+	INNER JOIN drug
+	USING (drug_name)
+	GROUP BY pr.specialty_description),
+-- second CTE for total opioid claims
+opioid AS
+	(SELECT
+		pr.specialty_description,
+		SUM(rx.total_claim_count) AS total_opioid
+	FROM prescriber AS pr
+	INNER JOIN prescription AS rx
+	USING(npi)
+	INNER JOIN drug
+	USING (drug_name)
+	WHERE drug.opioid_drug_flag ='Y'
+	GROUP BY pr.specialty_description)
+--main query
+SELECT
+	claims.specialty_description,
+	COALESCE(ROUND((opioid.total_opioid / claims.total_claims * 100),2),0) AS perc_opioid
+FROM claims
+LEFT JOIN opioid
+USING(specialty_description)
+ORDER BY perc_opioid DESC;
 
 
 
 
 
 
-
-
-SELECT pr.specialty_description,
-ROUND(AVG(CASE WHEN d.opioid_drug_flag = 'Y' THEN 1
-		 WHEN d.opioid_drug_flag = 'N' THEN 0 END),2) AS percentage_of_claims
-FROM prescription AS p
-LEFT JOIN prescriber AS pr	 
-USING (npi)	 
-LEFT JOIN drug AS d
-ON p.drug_name = d.drug_name
-GROUP BY pr.specialty_description
+--INITIAL ANSWER SELECT pr.specialty_description,
+-- ROUND(AVG(CASE WHEN d.opioid_drug_flag = 'Y' THEN 1
+-- 		 WHEN d.opioid_drug_flag = 'N' THEN 0 END),2) AS percentage_of_claims
+-- FROM prescription AS p
+-- LEFT JOIN prescriber AS pr	 
+-- USING (npi)	 
+-- LEFT JOIN drug AS d
+-- ON p.drug_name = d.drug_name
+-- GROUP BY pr.specialty_description
 
 
 
